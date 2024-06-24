@@ -60,12 +60,14 @@ const main = async () => {
       console.log(colors.white(`\nGenerated address ${i}: ${receiverAddress}`));
 
       const amountToSend = ethers.parseUnits(
-        (Math.random() * (0.0001 - 0.00001) + 0.00001).toFixed(8).toString(),
+        (Math.random() * (0.0000001 - 0.00000001) + 0.00000001)
+          .toFixed(10)
+          .toString(),
         'ether'
       );
 
       const gasPrice = ethers.parseUnits(
-        (Math.random() * (15 - 9) + 9).toFixed(2).toString(),
+        (Math.random() * (0.0015 - 0.0009) + 0.0009).toFixed(9).toString(),
         'gwei'
       );
 
