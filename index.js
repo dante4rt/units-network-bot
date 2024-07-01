@@ -1,27 +1,31 @@
-const { ethers } = require('ethers');
-const colors = require('colors');
-const fs = require('fs');
-const readlineSync = require('readline-sync');
+// Importing libraries:
+const { ethers } = require('ethers'); // A library for interacting with the Ethereum blockchain
+const colors = require('colors'); // A library for color manipulation and conversion
+const fs = require('fs'); // Providing an API for interacting with the file system 
+const readlineSync = require('readline-sync'); // Providing synchronous methods for reading input from the command line.
 
-const checkBalance = require('./src/checkBalance');
-const displayHeader = require('./src/displayHeader');
-const sleep = require('./src/sleep');
+// Importing scripts from /src folder:
+const checkBalance = require('./src/checkBalance'); // Importing the balance check script file
+const displayHeader = require('./src/displayHeader'); // mporting the display header script file (The first lines you see when you run the script)
+const sleep = require('./src/sleep'); // mporting the sleep script file 
 
 const rpcUrl = 'https://rpc-testnet.unit0.dev';
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 5000;
+const MAX_RETRIES = 5;  // The max amount of retries if the transaction faild
+const RETRY_DELAY = 5000; // The time between each retries in ms
 
-async function retry(fn, maxRetries = MAX_RETRIES, delay = RETRY_DELAY) {
+
+//Error handler:
+async function retry(fn, maxRetries = MAX_RETRIES, delay = RETRY_DELAY) { 
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
-    } catch (error) {
-      if (i === maxRetries - 1) throw error;
+    } catch (error) { // Ss
+      if (i === maxRetries - 1) throw error; // Returning the error
       console.log(
         colors.yellow(`Error occurred. Retrying... (${i + 1}/${maxRetries})`)
       );
-      await sleep(delay);
+      await sleep(delay); //Delay before retrying
     }
   }
 }
