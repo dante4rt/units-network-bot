@@ -9,7 +9,7 @@ const checkBalance = require('./src/checkBalance'); // Importing the balance che
 const displayHeader = require('./src/displayHeader'); // mporting the display header script file (The first lines you see when you run the script)
 const sleep = require('./src/sleep'); // mporting the sleep script file 
 
-const rpcUrl = 'https://rpc-testnet.unit0.dev';
+const rpcUrl = 'https://rpc-testnet.unit0.dev'; // Defining the RPC(Remote Procedure Call) URL
 
 const MAX_RETRIES = 5;  // The max amount of retries if the transaction faild
 const RETRY_DELAY = 5000; // The time between each retries in ms
@@ -30,24 +30,28 @@ async function retry(fn, maxRetries = MAX_RETRIES, delay = RETRY_DELAY) {
   }
 }
 
+//Main function:
 const main = async () => {
-  displayHeader();
+  displayHeader(); //Showing the header imported from /src file
 
-  const privateKeys = JSON.parse(fs.readFileSync('privateKeys.json'));
+  const privateKeys = JSON.parse(fs.readFileSync('privateKeys.json')); //Getting the private keys from the json file added by the user. The sender(s) private key
 
-  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const provider = new ethers.JsonRpcProvider(rpcUrl); // Connecting to an Ethereum node using the JSON-RPC protocol
 
+  // Creating wallet addresses for all of the private keys in the json file
   for (const privateKey of privateKeys) {
-    const wallet = new ethers.Wallet(privateKey, provider);
-    const senderAddress = wallet.address;
+    const wallet = new ethers.Wallet(privateKey, provider); //Creating a new wallet for the private key provided
+    const senderAddress = wallet.address; //Saving the wallet address
 
     console.log(
       colors.cyan(`Processing transactions for address: ${senderAddress}`)
     );
 
+
+    // Error handler for checking the balances of the wallets 
     let senderBalance;
     try {
-      senderBalance = await retry(() => checkBalance(provider, senderAddress));
+      senderBalance = await retry(() => checkBalance(provider, senderAddress)); // Saving the balacne of the wallet
     } catch (error) {
       console.log(
         colors.red(
@@ -57,6 +61,7 @@ const main = async () => {
       continue;
     }
 
+    // Checking if the wallet has enough balance 
     if (senderBalance < ethers.parseUnits('0.01', 'ether')) {
       console.log(
         colors.red('Insufficient or zero balance. Skipping to next address.')
@@ -64,22 +69,25 @@ const main = async () => {
       continue;
     }
 
+    // Updating the wallet balance and showing it to the user
     let continuePrintingBalance = true;
     const printSenderBalance = async () => {
       while (continuePrintingBalance) {
         try {
           senderBalance = await retry(() =>
-            checkBalance(provider, senderAddress)
+            checkBalance(provider, senderAddress) //Checking the balance
           );
           console.log(
-            colors.blue(
-              `Current Balance: ${ethers.formatUnits(
+            colors.blue( //Printing out the balance to the user
+              `Current Balance: ${ethers.formatUnits( //Converting the unit from the smallest denomination (wei)
                 senderBalance,
                 'ether'
               )} ETH`
             )
-          );
-          if (senderBalance < ethers.parseUnits('0.01', 'ether')) {
+          ); 
+
+          // Checking if the wallet has enough balance 
+            if (senderBalance < ethers.parseUnits('0.01', 'ether')) {
             console.log(colors.red('Insufficient balance for transactions.'));
             continuePrintingBalance = false;
           }
